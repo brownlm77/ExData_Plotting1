@@ -53,7 +53,7 @@ processFile <- function(filepath) {
         }
         colnames(df) <- header
         
-        # Add new row with Date/Time converted from text
+        # Add new datetime column with Date/Time converted from text
         df$datetime <- strptime(paste(df$Date, df$Time), "%d/%m/%Y %H:%M:%S")
         
         return(df)
