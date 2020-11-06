@@ -1,82 +1,117 @@
+#  plot3.R
 #
+#  Author:  Lawrence Brown
+#  Date:    6 Nov 2020
+#
+#  Scripts for generating plots
+#
+#  Source data:
+#     Electric power consumption [20Mb]
+#     https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip
 #
 
-readData <-function(fname, header=FALSE, nrow=-1) {
-     con <- file(fname, open="rt")
-     on.exit(close(con))
-     df = read.table(con, header=header, nrow=nrow, sep=';', na.strings = '?' ) 
-     return(df)
+
+#  processFile
+#
+#  Reads power consumption text file and returns data frame
+#
+#  Arguments: 
+#  
+#    filepath     name of file to read
+#
+#  Return:  data frame of energy values
+#
+#  Details: 
+#  
+#  Only keeps data for the dates 1/2/2007 and 2/2/2007
+#  A new column, datetime, is added that binds the Date and Time as
+#  a POSIXlt date
+
+processFile <- function(filepath) {
+        con = file(filepath, "rt")
+        on.exit(close(con))
+        
+        # Read Header line 
+        line = readLines(con, n = 1)
+        df = read.table(text = line, header=TRUE, sep=';', na.strings = '?' )
+        header = colnames(df)
+        
+        line = readLines(con, n = 1)
+        while ( !(length(line) == 0)) {
+                # Only add data if dates are 1/2/2007 and 2/2/2007
+                if (grepl('1/2/2007',line) || grepl('2/2/2007',line)) {
+                        dfnew = read.table(text = line, header=FALSE, sep=';', na.strings = '?' ) 
+                        df <- rbind(df, dfnew) 
+                }
+                line = readLines(con, n = 1)
+                
+                # Kick out if past 2/2/2007
+                if (grepl('3/2/2007',line)) {
+                        break
+                }
+        }
+        colnames(df) <- header
+        
+        # Add new row with Date/Time converted from text
+        df$datetime <- strptime(paste(df$Date, df$Time), "%d/%m/%Y %H:%M:%S")
+        
+        return(df)
 }
 
+#  plot3
+#
+#  Multi-plot for Sub_metering values using plot function
+#
+#  Arguments: 
+#  
+#    df        data frame of energy values
+#    
+#    tofile    boolean flag to indicate if print to file (default is TRUE)
+#
+#  Details: 
+#
+#    Plot file is plot3.png
 
-processFile <- function(filepath, nrow = 69520) {
-     con = file(filepath, "rt")
-     on.exit(close(con))
-     
-     # Read Header line 
-     line = readLines(con, n = 1)
-     df = read.table(text = line, header=TRUE, sep=';', na.strings = '?' )
-     header = colnames(df)
-     
-     count <- 1
-     line = readLines(con, n = 1)
-     #while ( !((length(line) == 0) || (count >= nrow) )) {
-     while ( !(length(line) == 0)) {
-          # Only add data if dates are 1/2/2007 and 2/2/2007
-          if (grepl('1/2/2007',line) || grepl('2/2/2007',line)) {
-               dfnew = read.table(text = line, header=FALSE, sep=';', na.strings = '?' ) 
-               df <- rbind(df, dfnew) 
-          }
-          line = readLines(con, n = 1)
-          count = count + 1 
-          # Kick out if past 2/2/2007
-          if (grepl('3/2/2007',line)) {
-               break
-          }
-     }
-     colnames(df) <- header
-     return(df)
-}
 
-plot3 <- function(df) {
+plot3 <- function(df, tofile=TRUE) {
      # Name the plot
-     #png(file = "plot3.png")
+     if (tofile) {
+         png(file = "plot3.png")
+     }
      
-     df$x <- strptime(paste(df$Date, df$Time), "%d/%m/%Y %H:%M:%S")
-     print(head(df))
-     with(df, {plot(x=df$x,
-                   y=df$Sub_metering_1,
-                   ylab='Energy sub metering', 
-                   xlab='',
-                   type = "l")
-
-               lines(x=df$x,
-                     y=df$Sub_metering_2,
+     df$datetime <- strptime(paste(df$Date, df$Time), "%d/%m/%Y %H:%M:%S")
+     with(df, { plot(x=datetime,
+                     y=Sub_metering_1,
+                     ylab='Energy sub metering', 
+                     xlab='',
+                     type = "l")
+               lines(x=datetime,
+                     y=Sub_metering_2,
                      col='red',
                      type="l")
-               lines(x=df$x,
-                     y=df$Sub_metering_3,
+               lines(x=datetime,
+                     y=Sub_metering_3,
                      col='blue')
-               #add a legend in top left corner of chart at (x, y) coordinates = (1, 19)
                legend("topright",
                       legend=c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"),
                       col=c("black", "red","blue"),
                       ncol=1,
                       lty=1)
+     })
      
-          })     
      
-     
-     # Save the file.
-     #dev.off()
+     # Save the plot
+     if (tofile) {
+         dev.off()
+     }
 }
 
+# unitTest
+#
+# Simple unit test of scripts to generate plot. 
 
 unitTest <- function() {
-     
      filename <- 'data/household_power_consumption.txt'
      df = processFile(filename)
-     print(nrow(df))
-     #plot2(df)
-     return(df)
+     plot3(df)
 }

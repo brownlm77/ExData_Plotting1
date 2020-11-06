@@ -1,5 +1,31 @@
+#  plot4.R
 #
+#  Author:  Lawrence Brown
+#  Date:    6 Nov 2020
 #
+#  Scripts for generating plots
+#
+#  Source data:
+#     Electric power consumption [20Mb]
+#     https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip
+#
+
+
+#  processFile
+#
+#  Reads power consumption text file and returns data frame
+#
+#  Arguments: 
+#  
+#    filepath     name of file to read
+#
+#  Return:  data frame of energy values
+#
+#  Details: 
+#  
+#  Only keeps data for the dates 1/2/2007 and 2/2/2007
+#  A new column, datetime, is added that binds the Date and Time as
+#  a POSIXlt date
 
 
 processFile <- function(filepath) {
@@ -32,6 +58,21 @@ processFile <- function(filepath) {
      
      return(df)
 }
+
+#  plot4
+#
+#  Multi-graph for plotting for plots of energy data
+#
+#  Arguments: 
+#  
+#    df        data frame of energy values
+#    
+#    tofile    boolean flag to indicate if print to file (default is TRUE)
+#
+#  Details: 
+#
+#    Plot file is plot4.png
+
 
 plot4 <- function(df, tofile=TRUE) {
      # Name the plot
@@ -87,15 +128,18 @@ plot4 <- function(df, tofile=TRUE) {
           ))       
      
      
-     # Save the file.
+     # Save the plot
      if (tofile) {
          dev.off()
      }
 }
 
+# unitTest
+#
+# Simple unit test of scripts to generate plot. 
 
 unitTest <- function() {
      filename <- 'data/household_power_consumption.txt'
      df = processFile(filename)
-     return(df)
+     plot4(df)
 }
