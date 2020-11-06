@@ -48,37 +48,25 @@ plot3 <- function(df) {
                    y=df$Sub_metering_1,
                    ylab='Energy sub metering', 
                    xlab='',
-                   type = "l",
-                   lty=1
-                   #xlim = c('Thur', 'Fri', 'Sat')
-                   #ylim = c(0, 1200)
-                  )
+                   type = "l")
+
                lines(x=df$x,
                      y=df$Sub_metering_2,
                      col='red',
-                     lty=2)
+                     type="l")
                lines(x=df$x,
                      y=df$Sub_metering_3,
-                     col='blue',
-                     lty=3)
+                     col='blue')
                #add a legend in top left corner of chart at (x, y) coordinates = (1, 19)
-               legend( 1,19,
+               legend("topright",
                       legend=c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"),
                       col=c("black", "red","blue"),
-                      lty=c(1,2,3), 
-                      ncol=1)
+                      ncol=1,
+                      lty=1)
      
-       }
-     )
+          })     
      
-     legend( 1,19,
-             legend=c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"),
-             col=c("black", "red","blue"),
-             #pch=c("-","-","-"),
-             lty=c(1,2,3), 
-             ncol=1)
      
-          
      # Save the file.
      #dev.off()
 }
